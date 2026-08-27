@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VanRakshak AI — Gir Forest HWC Mitigation Platform</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:       #0d1117;
+    --surface:  #161b22;
+    --surface2: #21262d;
+    --border:   #30363d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --high:     #da3633;
+    --medium:   #e3b341;
+    --low:      #3fb950;
+    --accent:   #238636;
+    --blue:     #388bfd;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; margin: 0; }
+
+  /* ── Nav ── */
+  .top-nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; gap: 0; height: 56px; }
+  .top-nav .brand { font-size: 16px; font-weight: 700; color: var(--low); white-space: nowrap; margin-right: 2rem; display: flex; align-items: center; gap: 8px; }
+  .top-nav .brand small { color: var(--medium); font-size: 10px; font-weight: 600; letter-spacing: 0.05em; }
+  .nav-tabs-custom { display: flex; gap: 0; flex-wrap: nowrap; overflow-x: auto; }
+  .nav-tabs-custom .nav-btn { background: none; border: none; color: var(--muted); padding: 0 14px; height: 56px; cursor: pointer; font-size: 13px; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .nav-tabs-custom .nav-btn:hover { color: var(--text); }
+  .nav-tabs-custom .nav-btn.active { color: var(--low); border-bottom-color: var(--low); }
+  .prototype-badge { margin-left: auto; font-size: 10px; color: var(--medium); border: 1px solid var(--medium); padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+
+  /* ── Layout ── */
+  .page { display: none; padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ── Cards ── */
+  .card-dark { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; }
+  .card-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.5rem; }
+  .stat-val { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Risk badges ── */
+  .badge-high   { background: rgba(218,54,51,0.18); color: #ff7b79; border: 1px solid rgba(218,54,51,0.4); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-medium { background: rgba(227,179,65,0.18); color: #f0c060; border: 1px solid rgba(227,179,65,0.4); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-low    { background: rgba(63,185,80,0.15);  color: #56d364; border: 1px solid rgba(63,185,80,0.35); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-none   { background: rgba(139,148,158,0.15); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .badge-critical { background: rgba(218,54,51,0.28); color: #ff4e4b; border: 1px solid rgba(218,54,51,0.6); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+
+  /* ── Status badges ── */
+  .badge-new        { background: rgba(56,139,253,0.15); color: #79c0ff; border: 1px solid rgba(56,139,253,0.3); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .badge-assigned   { background: rgba(227,179,65,0.15); color: #f0c060; border: 1px solid rgba(227,179,65,0.3); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .badge-progress   { background: rgba(63,185,80,0.12);  color: #56d364; border: 1px solid rgba(63,185,80,0.3);  padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .badge-resolved   { background: rgba(139,148,158,0.12); color: var(--muted); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .badge-escalated  { background: rgba(218,54,51,0.18); color: #ff7b79; border: 1px solid rgba(218,54,51,0.4); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .badge-pending    { background: rgba(227,179,65,0.15); color: #f0c060; border: 1px solid rgba(227,179,65,0.3); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+
+  /* ── Agent status ── */
+  .agent-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .agent-status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .dot-idle       { background: var(--muted); }
+  .dot-active     { background: var(--low); box-shadow: 0 0 6px var(--low); }
+  .dot-processing { background: var(--medium); box-shadow: 0 0 6px var(--medium); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── Tables ── */
+  .table-dark-custom { width: 100%; border-collapse: collapse; }
+  .table-dark-custom th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+  .table-dark-custom td { padding: 10px 12px; border-bottom: 1px solid rgba(48,54,61,0.5); vertical-align: middle; }
+  .table-dark-custom tr:hover td { background: rgba(255,255,255,0.02); }
+  .table-dark-custom tr:last-child td { border-bottom: none; }
+
+  /* ── Alert cards ── */
+  .alert-card { border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid; }
+  .alert-card.HIGH   { background: rgba(218,54,51,0.08);  border-color: var(--high); }
+  .alert-card.MEDIUM { background: rgba(227,179,65,0.08); border-color: var(--medium); }
+  .alert-card.LOW    { background: rgba(63,185,80,0.06);  border-color: var(--low); }
+
+  /* ── Confidence bar ── */
+  .conf-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .conf-fill { height: 100%; border-radius: 2px; background: var(--low); }
+
+  /* ── Risk score bar ── */
+  .risk-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; min-width: 80px; }
+  .risk-fill { height: 100%; border-radius: 3px; }
+  .risk-fill.HIGH   { background: var(--high); }
+  .risk-fill.MEDIUM { background: var(--medium); }
+  .risk-fill.LOW    { background: var(--low); }
+
+  /* ── Pipeline steps ── */
+  .pipeline { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; overflow-x: auto; padding: 1rem 0; }
+  .pipeline-step { text-align: center; min-width: 100px; }
+  .pipeline-step .circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 13px; font-weight: 700; }
+  .circle-done    { background: rgba(63,185,80,0.2);  border: 2px solid var(--low);    color: var(--low); }
+  .circle-human   { background: rgba(227,179,65,0.2); border: 2px solid var(--medium); color: var(--medium); }
+  .circle-pending { background: var(--surface2); border: 2px solid var(--border); color: var(--muted); }
+  .pipeline-arrow { color: var(--muted); font-size: 18px; padding: 0 4px; flex-shrink: 0; }
+  .pipeline-step .step-label { font-size: 11px; color: var(--muted); }
+
+  /* ── Demo steps ── */
+  .demo-step { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; }
+  .demo-step.COMPLETE       { border-left: 3px solid var(--low); }
+  .demo-step.AWAITING_HUMAN { border-left: 3px solid var(--medium); }
+  .demo-step.PENDING        { border-left: 3px solid var(--border); opacity: 0.6; }
+
+  /* ── Disclaimer banner ── */
+  .disclaimer-bar { background: rgba(227,179,65,0.1); border: 1px solid rgba(227,179,65,0.3); border-radius: 6px; padding: 6px 12px; font-size: 11px; color: var(--medium); margin-bottom: 1rem; }
+
+  /* ── IBM labels ── */
+  .ibm-label { font-size: 10px; color: #79c0ff; background: rgba(56,139,253,0.1); border: 1px solid rgba(56,139,253,0.25); padding: 2px 7px; border-radius: 3px; display: inline-block; }
+
+  /* ── RAI footer ── */
+  .rai-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 10px 1.5rem; display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+  .rai-item { display: flex; align-items: center; gap: 5px; }
+  .rai-dot-on  { width: 7px; height: 7px; border-radius: 50%; background: var(--low); }
+  .rai-dot-off { width: 7px; height: 7px; border-radius: 50%; background: var(--high); }
+
+  /* ── Checklist ── */
+  .checklist-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(48,54,61,0.4); font-size: 13px; }
+  .checklist-item:last-child { border-bottom: none; }
+
+  /* ── Claim preview ── */
+  .claim-preview { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+
+  /* Gujarati text */
+  .gu-text { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.7; }
+
+  /* Scrollable table wrapper */
+  .table-scroll { overflow-x: auto; }
+
+  /* Hotspot intensity */
+  .intensity-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; min-width: 120px; }
+  .intensity-fill { height: 100%; border-radius: 4px; }
+
+  /* Loading spinner */
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--low); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Approval card */
+  .approval-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+  .approval-card.pending { border-left: 3px solid var(--medium); }
+
+  /* Form control dark */
+  .form-control-dark, .form-select-dark {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 8px 12px; width: 100%; font-size: 13px;
+  }
+  .form-control-dark:focus, .form-select-dark:focus {
+    outline: none; border-color: var(--accent); background: var(--surface2);
+  }
+  .form-select-dark option { background: var(--surface2); color: var(--text); }
+
+  /* Btn variants */
+  .btn-green  { background: var(--accent); border: none; color: #fff; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .btn-green:hover { background: #2ea043; }
+  .btn-red    { background: rgba(218,54,51,0.2); border: 1px solid var(--high); color: #ff7b79; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .btn-red:hover { background: rgba(218,54,51,0.35); }
+  .btn-blue   { background: rgba(56,139,253,0.2); border: 1px solid rgba(56,139,253,0.5); color: #79c0ff; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .btn-blue:hover { background: rgba(56,139,253,0.3); }
+  .btn-ghost  { background: none; border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+  /* Grid helpers */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+  @media(max-width:900px){ .g4{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:1fr 1fr;} }
+  @media(max-width:600px){ .g4{grid-template-columns:1fr;} .g3{grid-template-columns:1fr;} .g2{grid-template-columns:1fr;} }
+
+  label.form-label-dark { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* Workflow diagram */
+  .workflow-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 12px; text-align: center; }
+  .workflow-arrow { color: var(--muted); font-size: 20px; display: flex; align-items: center; }
+
+  .sample-label { font-size: 10px; color: var(--muted); background: rgba(139,148,158,0.12); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ TOP NAV ═══════════════════════ -->
+<nav class="top-nav">
+  <div class="brand">
+    <i class="bi bi-tree-fill" style="color:var(--low)"></i>
+    VanRakshak AI
+    <small>PROTOTYPE</small>
+  </div>
+  <div class="nav-tabs-custom">
+    <button class="nav-btn active" onclick="showTab('dashboard')"><i class="bi bi-speedometer2"></i> Dashboard</button>
+    <button class="nav-btn" onclick="showTab('alerts')"><i class="bi bi-bell-fill"></i> Village Alerts</button>
+    <button class="nav-btn" onclick="showTab('incidents')"><i class="bi bi-exclamation-triangle-fill"></i> Incidents</button>
+    <button class="nav-btn" onclick="showTab('approvals')"><i class="bi bi-person-check-fill"></i> Officer Approvals</button>
+    <button class="nav-btn" onclick="showTab('compensation')"><i class="bi bi-file-earmark-text-fill"></i> Compensation</button>
+    <button class="nav-btn" onclick="showTab('hotspots')"><i class="bi bi-geo-alt-fill"></i> Hotspots</button>
+    <button class="nav-btn" onclick="showTab('agents')"><i class="bi bi-cpu-fill"></i> Agent Monitor</button>
+    <button class="nav-btn" onclick="showTab('demo')"><i class="bi bi-play-circle-fill"></i> Demo</button>
+  </div>
+  <span class="prototype-badge">⚠ DEMO MODE</span>
+</nav>
+
+<!-- ═══════════════════════ DISCLAIMER BANNER ═══════════════════════ -->
+<div style="background:rgba(227,179,65,0.07);border-bottom:1px solid rgba(227,179,65,0.2);padding:5px 1.5rem;font-size:11px;color:var(--medium);text-align:center;">
+  ⚠️ PROTOTYPE / HACKATHON DEMO — All data is synthetic. Not for real-world field use. AI recommendations require human officer approval before any action.
+</div>
+
+<!-- ═══════════════════════ PAGE: DASHBOARD ═══════════════════════ -->
+<div class="page active" id="page-dashboard">
+  <div style="margin-bottom:1.5rem;">
+    <h4 style="margin:0;font-weight:700;">VanRakshak AI — Command Center</h4>
+    <div style="color:var(--muted);font-size:12px;margin-top:4px;">
+      Gir Forest Sector | Human–Wildlife Conflict Mitigation Platform
+      <span class="ibm-label ms-2">IBM Bob — Development Platform</span>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="g4" style="margin-bottom:1.25rem;" id="stats-row">
+    <div class="card-dark">
+      <div class="card-title"><i class="bi bi-exclamation-circle me-1"></i>Active Incidents</div>
+      <div class="stat-val" id="stat-incidents">—</div>
+      <div class="stat-label">Requires attention <span class="sample-label">SAMPLE</span></div>
+    </div>
+    <div class="card-dark">
+      <div class="card-title"><i class="bi bi-geo-fill me-1"></i>High Risk Zones</div>
+      <div class="stat-val" style="color:var(--high);" id="stat-highrisk">—</div>
+      <div class="stat-label">Villages at HIGH risk <span class="sample-label">SAMPLE</span></div>
+    </div>
+    <div class="card-dark">
+      <div class="card-title"><i class="bi bi-cpu me-1"></i>Avg AI Confidence</div>
+      <div class="stat-val" style="color:var(--low);" id="stat-confidence">—</div>
+      <div class="stat-label">Prototype model accuracy <span class="sample-label">SAMPLE</span></div>
+    </div>
+    <div class="card-dark">
+      <div class="card-title"><i class="bi bi-person-check me-1"></i>Pending Approvals</div>
+      <div class="stat-val" style="color:var(--medium);" id="stat-approvals">—</div>
+      <div class="stat-label">Officer review required</div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:1.25rem;">
+    <!-- Village risk table -->
+    <div class="card-dark">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="card-title mb-0"><i class="bi bi-house-fill me-1"></i>Village Risk Overview</span>
+        <span class="sample-label">SAMPLE DATA</span>
+      </div>
+      <div class="table-scroll">
+        <table class="table-dark-custom" id="village-table">
+          <thead><tr><th>Village</th><th>Risk Level</th><th>Score</th><th>Livestock</th></tr></thead>
+          <tbody id="village-tbody"><tr><td colspan="4" style="color:var(--muted);text-align:center;padding:1rem;">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recent sightings -->
+    <div class="card-dark">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="card-title mb-0"><i class="bi bi-binoculars-fill me-1"></i>Recent Sightings</span>
+        <span class="sample-label">SAMPLE DATA</span>
+      </div>
+      <div id="sightings-feed">Loading…</div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:1.25rem;">
+    <!-- Active incidents summary -->
+    <div class="card-dark">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="card-title mb-0"><i class="bi bi-shield-exclamation me-1"></i>Active Incidents</span>
+        <span class="sample-label">SAMPLE DATA</span>
+      </div>
+      <div id="incidents-summary">Loading…</div>
+    </div>
+
+    <!-- Recent alerts -->
+    <div class="card-dark">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="card-title mb-0"><i class="bi bi-bell me-1"></i>Recent Alerts</span>
+        <span class="ibm-label">IBM Granite LLM — NLG (Proposed)</span>
+      </div>
+      <div id="recent-alerts-dash">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Agent status panel -->
+  <div class="card-dark">
+    <div class="card-title mb-3"><i class="bi bi-cpu me-1"></i>Agent Status Panel</div>
+    <div class="g3" id="agent-status-dash">Loading…</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: VILLAGE ALERTS ═══════════════════════ -->
+<div class="page" id="page-alerts">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 style="margin:0;">Village Alerts & Early Warning</h4>
+      <div style="font-size:12px;color:var(--muted);">Bilingual (English + Gujarati) AI-generated alerts
+        <span class="ibm-label ms-2">IBM Granite LLM — NLG (Proposed Integration — Simulated)</span>
+      </div>
+    </div>
+    <button class="btn-green" onclick="generateAlert()"><i class="bi bi-plus-circle me-1"></i>Generate New Alert</button>
+  </div>
+  <div class="disclaimer-bar">⚠ LOW risk events are logged only and not broadcast. MEDIUM/HIGH alerts are broadcast to village nodes.</div>
+  <div id="alerts-list">Loading…</div>
+</div>
+
+<!-- ═══════════════════════ PAGE: INCIDENTS ═══════════════════════ -->
+<div class="page" id="page-incidents">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 style="margin:0;">Incident Management</h4>
+      <div style="font-size:12px;color:var(--muted);">Lifecycle: NEW → ASSIGNED → IN_PROGRESS → RESOLVED / ESCALATED</div>
+    </div>
+    <span class="sample-label" style="font-size:12px;">SAMPLE DATA</span>
+  </div>
+
+  <!-- Pipeline visual -->
+  <div class="card-dark mb-3">
+    <div class="card-title mb-2">Status Pipeline</div>
+    <div class="pipeline">
+      <div class="pipeline-step"><div class="circle circle-done">1</div><div class="step-label">NEW</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-done">2</div><div class="step-label">ASSIGNED</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-done">3</div><div class="step-label">IN PROGRESS</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-human">4</div><div class="step-label">RESOLVED</div></div>
+      <div class="pipeline-arrow" style="color:var(--high)"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle" style="border-color:var(--high);color:var(--high);background:rgba(218,54,51,0.15)">!</div><div class="step-label">ESCALATED</div></div>
+    </div>
+  </div>
+
+  <div class="card-dark">
+    <div class="table-scroll">
+      <table class="table-dark-custom" id="incidents-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Village</th><th>Species</th><th>Type</th><th>Severity</th>
+            <th>Risk Score</th><th>Status</th><th>Time</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="incidents-tbody"><tr><td colspan="9" style="color:var(--muted);text-align:center;padding:1.5rem;">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: OFFICER APPROVALS ═══════════════════════ -->
+<div class="page" id="page-approvals">
+  <div class="mb-3">
+    <h4 style="margin:0;"><i class="bi bi-person-check-fill me-2" style="color:var(--medium)"></i>Officer Approval Queue — Human-in-the-Loop</h4>
+    <div style="font-size:12px;color:var(--muted);">Every consequential AI recommendation requires officer review before execution.</div>
+  </div>
+
+  <div class="card-dark mb-3" style="border-color:rgba(227,179,65,0.4);">
+    <div style="font-size:13px;font-weight:600;color:var(--medium);margin-bottom:6px;">
+      <i class="bi bi-info-circle me-1"></i>Human-in-the-Loop Policy
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7;">
+      AI generates recommendations → Forest Officer reviews → Officer APPROVES or OVERRIDES → Action executed.<br>
+      <strong style="color:var(--text);">No autonomous dispatch or compensation approval. Ever.</strong>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+      AI RECOMMENDATION → HUMAN OFFICER REVIEW → APPROVE / OVERRIDE
+    </div>
+  </div>
+
+  <div id="approvals-list">Loading…</div>
+  <div id="approvals-empty" style="display:none;" class="card-dark text-center" style="color:var(--muted);padding:2rem;">
+    <i class="bi bi-check-circle-fill" style="font-size:2rem;color:var(--low);"></i>
+    <div style="margin-top:0.5rem;color:var(--muted);">No pending approvals. All actions reviewed.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: COMPENSATION ═══════════════════════ -->
+<div class="page" id="page-compensation">
+  <div class="mb-3">
+    <h4 style="margin:0;"><i class="bi bi-file-earmark-text-fill me-2" style="color:var(--blue)"></i>Livestock Compensation Assistant</h4>
+    <div style="font-size:12px;color:var(--muted);">AI-assisted claim preparation. Final decision by authorized forest official only.</div>
+  </div>
+
+  <div class="disclaimer-bar">
+    ⚠ This tool prepares a PRELIMINARY claim summary only.
+    It does NOT approve or reject compensation. All claims are submitted for human officer review.
+    Amounts shown are indicative based on sample Gujarat state guidelines. <span class="sample-label">INDICATIVE RATES</span>
+  </div>
+
+  <div class="g2">
+    <!-- Form -->
+    <div class="card-dark">
+      <div class="card-title mb-3"><i class="bi bi-pencil-square me-1"></i>Submit Compensation Claim</div>
+      <div style="display:grid;gap:0.75rem;">
+        <div>
+          <label class="form-label-dark">Claimant Name *</label>
+          <input id="comp-name" class="form-control-dark" placeholder="e.g. Ramjibhai Patel"/>
+        </div>
+        <div class="g2">
+          <div>
+            <label class="form-label-dark">Village *</label>
+            <select id="comp-village" class="form-select-dark">
+              <option value="V001" data-name="Sasan Gir">Sasan Gir</option>
+              <option value="V002" data-name="Dhari">Dhari</option>
+              <option value="V003" data-name="Talala">Talala</option>
+              <option value="V004" data-name="Visavadar">Visavadar</option>
+              <option value="V005" data-name="Una">Una</option>
+              <option value="V006" data-name="Mendarda">Mendarda</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label-dark">Species Responsible</label>
+            <select id="comp-species" class="form-select-dark">
+              <option>Asiatic Lion</option>
+              <option>Leopard</option>
+              <option>Hyena</option>
+              <option>Wild Boar</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="g2">
+          <div>
+            <label class="form-label-dark">Livestock Type *</label>
+            <select id="comp-livestock" class="form-select-dark">
+              <option value="buffalo">Buffalo</option>
+              <option value="cow">Cow</option>
+              <option value="ox">Ox</option>
+              <option value="sheep">Sheep</option>
+              <option value="goat">Goat</option>
+              <option value="horse">Horse</option>
+              <option value="pig">Pig</option>
+              <option value="poultry">Poultry</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label-dark">Number of Animals *</label>
+            <input id="comp-count" type="number" min="1" value="1" class="form-control-dark"/>
+          </div>
+        </div>
+        <div>
+          <label class="form-label-dark">Incident ID (if known)</label>
+          <input id="comp-incidentid" class="form-control-dark" placeholder="e.g. INC-001"/>
+        </div>
+        <div>
+          <label class="form-label-dark">Additional Notes</label>
+          <textarea id="comp-notes" class="form-control-dark" rows="2" placeholder="Describe the incident briefly…"></textarea>
+        </div>
+        <div>
+          <label class="form-label-dark">Documents Available (check all that apply)</label>
+          <div id="doc-checklist" style="display:grid;gap:4px;margin-top:6px;"></div>
+        </div>
+        <button class="btn-green" onclick="submitClaim()"><i class="bi bi-send me-1"></i>Generate Preliminary Claim</button>
+      </div>
+    </div>
+
+    <!-- Claim preview -->
+    <div>
+      <div class="card-dark mb-3" id="claim-preview-area" style="display:none;">
+        <div class="card-title mb-2"><i class="bi bi-file-earmark-check me-1"></i>Preliminary Claim Summary</div>
+        <div id="claim-preview-content"></div>
+        <div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border);font-size:11px;color:var(--muted);">
+          This preliminary summary has been added to the Officer Approval Queue.
+          Final decision by authorized Forest Department / Revenue officer only.
+        </div>
+        <button class="btn-blue mt-2" onclick="showTab('approvals')"><i class="bi bi-person-check me-1"></i>View in Approval Queue</button>
+      </div>
+
+      <!-- Past claims -->
+      <div class="card-dark">
+        <div class="card-title mb-2"><i class="bi bi-clock-history me-1"></i>Submitted Claims</div>
+        <div id="claims-list"><div style="color:var(--muted);font-size:12px;">No claims submitted yet in this session.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: HOTSPOTS ═══════════════════════ -->
+<div class="page" id="page-hotspots">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 style="margin:0;"><i class="bi bi-geo-alt-fill me-2" style="color:var(--high)"></i>Conflict Hotspot Analysis</h4>
+      <div style="font-size:12px;color:var(--muted);">Distance-based cluster analysis. <span class="sample-label">PROTOTYPE</span></div>
+    </div>
+    <button class="btn-ghost" onclick="loadHotspots()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+  </div>
+
+  <div id="hotspot-summaries" class="g2 mb-3"></div>
+
+  <div class="g2 mb-3">
+    <div class="card-dark">
+      <div class="card-title mb-2"><i class="bi bi-fire me-1"></i>Hotspot Clusters</div>
+      <div id="hotspot-table">Loading…</div>
+    </div>
+    <div class="card-dark">
+      <div class="card-title mb-2"><i class="bi bi-graph-up-arrow me-1"></i>Trending / Emerging Areas</div>
+      <div id="trending-list">Loading…</div>
+    </div>
+  </div>
+
+  <div class="card-dark">
+    <div class="card-title mb-2"><i class="bi bi-trophy-fill me-1"></i>Village Risk Rankings</div>
+    <div class="table-scroll">
+      <table class="table-dark-custom">
+        <thead><tr><th>Rank</th><th>Village</th><th>Hotspot Intensity</th><th>Level</th><th>Hotspot ID</th></tr></thead>
+        <tbody id="rankings-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: AGENT MONITOR ═══════════════════════ -->
+<div class="page" id="page-agents">
+  <div class="mb-3">
+    <h4 style="margin:0;"><i class="bi bi-cpu-fill me-2" style="color:var(--blue)"></i>Agent Monitor</h4>
+    <div style="font-size:12px;color:var(--muted);">Real-time status of all 5 specialized AI agents</div>
+  </div>
+
+  <!-- Workflow diagram -->
+  <div class="card-dark mb-3">
+    <div class="card-title mb-3">Agent Workflow Pipeline</div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:0.5rem 0;">
+      <div class="workflow-box" style="border-color:var(--blue);color:#79c0ff;">🔍 Field Sensor / Guard<br><small style="color:var(--muted);">Sighting Input</small></div>
+      <div class="workflow-arrow">→</div>
+      <div class="workflow-box" style="border-color:var(--accent);color:var(--low);">🧠 Agent 1<br><small style="color:var(--muted);">Movement Predict</small></div>
+      <div class="workflow-arrow">→</div>
+      <div class="workflow-box" style="border-color:var(--accent);color:var(--low);">📢 Agent 2<br><small style="color:var(--muted);">Village Alert</small></div>
+      <div class="workflow-arrow">→</div>
+      <div class="workflow-box" style="border-color:var(--accent);color:var(--low);">🚨 Agent 3<br><small style="color:var(--muted);">Response Coord</small></div>
+      <div class="workflow-arrow" style="color:var(--medium)">→</div>
+      <div class="workflow-box" style="border-color:var(--medium);color:var(--medium);">👮 Officer<br><small style="color:var(--muted);">Human Approval</small></div>
+      <div class="workflow-arrow">→</div>
+      <div class="workflow-box" style="border-color:var(--blue);color:#79c0ff;">📊 Agent 5<br><small style="color:var(--muted);">Hotspot Update</small></div>
+    </div>
+    <div style="margin-top:0.75rem;font-size:11px;color:var(--muted);">
+      Agent 4 (Compensation) runs independently on claim submissions. All agents report to central Orchestrator.
+    </div>
+  </div>
+
+  <!-- Agent cards -->
+  <div class="g3 mb-3" id="agent-cards">Loading…</div>
+
+  <!-- Recent logs -->
+  <div class="card-dark">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="card-title mb-0"><i class="bi bi-journal-text me-1"></i>Recent Agent Logs</span>
+      <button class="btn-ghost" style="font-size:11px;padding:3px 10px;" onclick="loadAgentLogs()">Refresh</button>
+    </div>
+    <div id="agent-logs-list">Loading…</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE: DEMO SCENARIO ═══════════════════════ -->
+<div class="page" id="page-demo">
+  <div class="mb-3">
+    <h4 style="margin:0;"><i class="bi bi-play-circle-fill me-2" style="color:var(--low)"></i>End-to-End Demo Scenario</h4>
+    <div style="font-size:12px;color:var(--muted);">Simulates a complete pipeline: Lion Sighting → Alert → Coordinate → Human Approval → Learn</div>
+  </div>
+
+  <div class="card-dark mb-3">
+    <div style="font-size:13px;margin-bottom:1rem;">
+      <strong>Scenario:</strong> Male Asiatic Lion sighted 0.7 km from Sasan Gir village at 22:30 IST.
+      Watch all 5 agents + orchestrator + human-in-the-loop work in sequence.
+    </div>
+    <button class="btn-green" id="demo-btn" onclick="runDemo()">
+      <i class="bi bi-play-fill me-1"></i>Run Demo Scenario
+    </button>
+    <span id="demo-spinner" style="display:none;" class="ms-3"><span class="spinner"></span> Running pipeline…</span>
+  </div>
+
+  <!-- Pipeline overview -->
+  <div class="card-dark mb-3">
+    <div class="card-title mb-2">Pipeline: PREDICT → ALERT → COORDINATE → LEARN</div>
+    <div class="pipeline" id="demo-pipeline">
+      <div class="pipeline-step"><div class="circle circle-pending">1</div><div class="step-label">Sighting</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-pending">2</div><div class="step-label">Predict</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-pending">3</div><div class="step-label">Alert</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-pending">4</div><div class="step-label">Respond</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-pending">5</div><div class="step-label">Approve</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-pending">6</div><div class="step-label">Hotspot</div></div>
+      <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+      <div class="pipeline-step"><div class="circle circle-pending">7</div><div class="step-label">Audit</div></div>
+    </div>
+  </div>
+
+  <!-- Step-by-step output -->
+  <div id="demo-steps"></div>
+
+  <!-- IBM tech labels -->
+  <div class="card-dark mt-3">
+    <div class="card-title mb-2"><i class="bi bi-building me-1"></i>IBM Technology Integration</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <span class="ibm-label">IBM Granite LLM — Natural Language Generation (Proposed)</span>
+      <span class="ibm-label">IBM Cloud — Deployment Target (Architecture Ready)</span>
+      <span class="ibm-label">IBM Bob — Development Platform</span>
+      <span class="ibm-label">IBM Watson — AI Runtime (Proposed)</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ RESPONSIBLE AI FOOTER ═══════════════════════ -->
+<div class="rai-bar">
+  <div class="rai-item"><div class="rai-dot-on"></div>Human-in-the-Loop: ENABLED</div>
+  <div class="rai-item"><div class="rai-dot-on"></div>Audit Logging: ACTIVE</div>
+  <div class="rai-item"><div class="rai-dot-on"></div>Location Privacy: PROTECTED</div>
+  <div class="rai-item"><div class="rai-dot-off"></div>Autonomous Dispatch: DISABLED</div>
+  <div class="rai-item" style="margin-left:auto;"><span class="ibm-label">IBM Bob — Dev Platform</span></div>
+  <div style="color:var(--muted);font-size:10px;">VanRakshak AI v0.1 · PROTOTYPE · Gir Forest · IBM Hackathon Demo</div>
+</div>
+
+<!-- ═══════════════════════ JAVASCRIPT ═══════════════════════ -->
+<script>
+// ── Tab navigation ──────────────────────────────────────────
+function showTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + tab + "'")) {
+      b.classList.add('active');
+    }
+  });
+  // Load data for that tab
+  if (tab === 'dashboard')    loadDashboard();
+  if (tab === 'alerts')       loadAlerts();
+  if (tab === 'incidents')    loadIncidents();
+  if (tab === 'approvals')    loadApprovals();
+  if (tab === 'hotspots')     loadHotspots();
+  if (tab === 'agents')       { loadAgentCards(); loadAgentLogs(); }
+  if (tab === 'compensation') { loadCompDocs(); loadClaims(); }
+}
+
+// ── Helpers ─────────────────────────────────────────────────
+async function api(path, method='GET', body=null) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+function riskBadge(level) {
+  const l = (level||'').toUpperCase();
+  if (l === 'HIGH')     return `<span class="badge-high">HIGH</span>`;
+  if (l === 'MEDIUM')   return `<span class="badge-medium">MEDIUM</span>`;
+  if (l === 'CRITICAL') return `<span class="badge-critical">CRITICAL</span>`;
+  return `<span class="badge-low">LOW</span>`;
+}
+
+function statusBadge(s) {
+  const m = {'NEW':'badge-new','ASSIGNED':'badge-assigned','IN_PROGRESS':'badge-progress',
+             'RESOLVED':'badge-resolved','ESCALATED':'badge-escalated','PENDING':'badge-pending'};
+  const cls = m[(s||'').toUpperCase()] || 'badge-none';
+  return `<span class="${cls}">${s||'?'}</span>`;
+}
+
+function conf(c) {
+  const pct = Math.round((c||0)*100);
+  const col = pct>=75?'var(--low)':pct>=50?'var(--medium)':'var(--high)';
+  return `<div style="display:flex;align-items:center;gap:6px;">
+    <div class="conf-bar" style="width:60px;"><div class="conf-fill" style="width:${pct}%;background:${col};"></div></div>
+    <span style="font-size:11px;color:${col};">${pct}%</span></div>`;
+}
+
+function riskBar(score, level) {
+  return `<div class="risk-bar"><div class="risk-fill ${level}" style="width:${Math.round(score*100)}%"></div></div>`;
+}
+
+function timeAgo(ts) {
+  if (!ts) return '—';
+  const d = (Date.now() - new Date(ts).getTime()) / 1000;
+  if (d < 60)   return 'just now';
+  if (d < 3600) return Math.round(d/60) + 'm ago';
+  if (d < 86400)return Math.round(d/3600) + 'h ago';
+  return Math.round(d/86400) + 'd ago';
+}
+
+function speciesIcon(s) {
+  const m = {'Asiatic Lion':'🦁','Leopard':'🐆','Hyena':'🐺','Wild Boar':'🐗'};
+  return m[s] || '🐾';
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────
+async function loadDashboard() {
+  const res = await api('/api/dashboard');
+  if (!res.success) return;
+  const d = res.data;
+  const s = d.stats;
+  document.getElementById('stat-incidents').textContent  = s.active_incidents;
+  document.getElementById('stat-highrisk').textContent   = s.high_risk_zones;
+  document.getElementById('stat-confidence').textContent = Math.round(s.avg_confidence*100)+'%';
+  document.getElementById('stat-approvals').textContent  = s.pending_approvals;
+
+  // Village table
+  const vtb = document.getElementById('village-tbody');
+  vtb.innerHTML = (d.villages||[]).map(v => `
+    <tr>
+      <td style="font-weight:500;">${v.name}</td>
+      <td>${riskBadge(v.risk_level)}</td>
+      <td>${riskBar(v.risk_score||0, v.risk_level)}
+          <span style="font-size:11px;color:var(--muted);margin-left:4px;">${((v.risk_score||0)*100).toFixed(0)}%</span>
+      </td>
+      <td style="color:var(--muted);">${v.livestock_count} <span class="sample-label">sample</span></td>
+    </tr>`).join('');
+
+  // Sightings feed
+  const sf = document.getElementById('sightings-feed');
+  sf.innerHTML = (d.recent_sightings||[]).map(s => `
+    <div style="padding:7px 0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span>${speciesIcon(s.species)} <strong>${s.species}</strong>
+          ${riskBadge(s.distance_km<=1?'HIGH':s.distance_km<=2?'MEDIUM':'LOW')}
+        </span>
+        <span style="font-size:11px;color:var(--muted);">${timeAgo(s.timestamp)}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);">${s.notes||''} · ${s.distance_km}km from ${(s.nearest_village||'')} <span class="sample-label">sample</span></div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;">No sightings yet.</div>';
+
+  // Incidents summary
+  const is = document.getElementById('incidents-summary');
+  is.innerHTML = (d.recent_incidents||[]).map(i => `
+    <div style="padding:7px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <span style="font-family:monospace;font-size:12px;color:var(--blue);">${i.id}</span>
+        <span style="margin-left:8px;">${speciesIcon(i.species)} ${i.species}</span>
+        <span style="margin-left:6px;font-size:11px;color:var(--muted);">${i.village_name||i.village_id}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        ${riskBadge(i.severity)} ${statusBadge(i.status)}
+      </div>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px;">No incidents.</div>';
+
+  // Alerts
+  const ra = document.getElementById('recent-alerts-dash');
+  const alerts = (d.recent_alerts||[]);
+  if (!alerts.length) {
+    ra.innerHTML = '<div style="color:var(--muted);font-size:12px;">No alerts yet — run a scenario or add a sighting.</div>';
+  } else {
+    ra.innerHTML = alerts.map(a => `
+      <div style="padding:7px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;">
+          ${riskBadge(a.severity)}
+          <span style="font-size:11px;color:var(--muted);">${timeAgo(a.timestamp)}</span>
+        </div>
+        <div style="font-size:12px;margin-top:4px;">${a.village_name} — ${a.species}</div>
+        <div style="font-size:11px;color:var(--muted);">${a.broadcast?'📣 Broadcast':'🔇 Logged only'}</div>
+      </div>`).join('');
+  }
+
+  // Agent status
+  const asd = document.getElementById('agent-status-dash');
+  asd.innerHTML = renderAgentCards(d.agent_statuses||[]);
+}
+
+// ── ALERTS ───────────────────────────────────────────────────
+async function loadAlerts() {
+  const res = await api('/api/alerts');
+  if (!res.success) return;
+  const alerts = res.data;
+  const el = document.getElementById('alerts-list');
+  if (!alerts.length) {
+    el.innerHTML = '<div class="card-dark" style="text-align:center;color:var(--muted);padding:2rem;">No alerts generated yet. Run the demo or report a sighting.</div>';
+    return;
+  }
+  el.innerHTML = alerts.map(a => `
+    <div class="alert-card ${a.severity}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+        <div>
+          ${riskBadge(a.severity)}
+          <strong style="margin-left:8px;">${a.village_name}</strong>
+          <span style="color:var(--muted);margin-left:6px;">${speciesIcon(a.species)} ${a.species}</span>
+          ${a.broadcast ? '<span style="font-size:11px;color:var(--low);margin-left:8px;">📣 BROADCAST</span>' : '<span style="font-size:11px;color:var(--muted);margin-left:8px;">🔇 Logged only</span>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          ${conf(a.confidence)}
+          <span style="font-size:11px;color:var(--muted);">${timeAgo(a.timestamp)}</span>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:13px;line-height:1.6;">${a.en_text||''}</div>
+      ${a.gu_text ? `<div class="gu-text">${a.gu_text}</div>` : ''}
+      ${(a.safety_actions||[]).length ? `
+        <div style="margin-top:10px;">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Safety Actions</div>
+          <ul style="margin:0;padding-left:1.2rem;font-size:12px;color:var(--text);">
+            ${a.safety_actions.map(act=>`<li>${act}</li>`).join('')}
+          </ul>
+        </div>` : ''}
+      <div style="margin-top:8px;font-size:10px;color:var(--muted);">
+        ${a.alert_id} · <span class="ibm-label">${a.nlg_note||'IBM Granite LLM — NLG (Proposed)'}</span>
+      </div>
+    </div>`).join('');
+}
+
+async function generateAlert() {
+  const res = await api('/api/alerts/generate', 'POST', {village_id:'V001'});
+  if (res.success) loadAlerts();
+}
+
+// ── INCIDENTS ────────────────────────────────────────────────
+async function loadIncidents() {
+  const res = await api('/api/incidents');
+  if (!res.success) return;
+  const incidents = res.data;
+  const tb = document.getElementById('incidents-tbody');
+  if (!incidents.length) {
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem;">No incidents.</td></tr>';
+    return;
+  }
+  tb.innerHTML = incidents.map(i => `
+    <tr>
+      <td style="font-family:monospace;font-size:12px;color:var(--blue);">${i.id}</td>
+      <td>${i.village_name||i.village_id}</td>
+      <td>${speciesIcon(i.species)} ${i.species}</td>
+      <td style="font-size:12px;color:var(--muted);">${(i.incident_type||'').replace(/_/g,' ')}</td>
+      <td>${riskBadge(i.severity)}</td>
+      <td>
+        ${riskBar(i.risk_score||0, i.severity)}
+        <span style="font-size:11px;color:var(--muted);">${((i.risk_score||0)*100).toFixed(0)}% <span class="sample-label">prototype</span></span>
+      </td>
+      <td>${statusBadge(i.status)}</td>
+      <td style="font-size:11px;color:var(--muted);">${timeAgo(i.timestamp)}</td>
+      <td>
+        <select onchange="updateIncidentStatus('${i.id}', this.value)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 6px;border-radius:4px;font-size:11px;">
+          <option value="">— Update —</option>
+          ${['NEW','ASSIGNED','IN_PROGRESS','RESOLVED','ESCALATED'].map(s=>`<option value="${s}" ${i.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`).join('');
+}
+
+async function updateIncidentStatus(id, status) {
+  if (!status) return;
+  await api(`/api/incidents/${id}/update`, 'POST', {status});
+  loadIncidents();
+}
+
+// ── APPROVALS ────────────────────────────────────────────────
+async function loadApprovals() {
+  const res = await api('/api/approval-queue');
+  if (!res.success) return;
+  const queue = res.data;
+  const el = document.getElementById('approvals-list');
+  const empty = document.getElementById('approvals-empty');
+  if (!queue.length) {
+    el.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  el.innerHTML = queue.map(item => `
+    <div class="approval-card pending">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+        <div>
+          <span style="font-family:monospace;font-size:11px;color:var(--muted);">${item.action_id}</span>
+          <span class="badge-pending ms-2">${(item.action_type||'').replace(/_/g,' ')}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${conf(item.confidence)}
+          <span style="font-size:11px;color:var(--muted);">${timeAgo(item.timestamp)}</span>
+        </div>
+      </div>
+      <div style="background:rgba(56,139,253,0.08);border:1px solid rgba(56,139,253,0.2);border-radius:6px;padding:10px 14px;margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">AI Recommendation</div>
+        <div style="font-size:13px;">${item.ai_recommendation}</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+        <strong style="color:var(--text);">Reasoning:</strong> ${item.reasoning||''}
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="btn-green" onclick="doApprove('${item.action_id}','APPROVE')">
+          <i class="bi bi-check-lg me-1"></i>APPROVE
+        </button>
+        <button class="btn-red" onclick="doApprove('${item.action_id}','REJECT')">
+          <i class="bi bi-x-lg me-1"></i>OVERRIDE / REJECT
+        </button>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;">
+          <i class="bi bi-shield-check me-1"></i>Officer decision required
+        </span>
+      </div>
+    </div>`).join('');
+}
+
+async function doApprove(actionId, decision) {
+  const note = decision === 'REJECT' ? (prompt('Optional: reason for override') || '') : '';
+  const res = await api(`/api/approve/${actionId}`, 'POST', {decision, officer_note: note});
+  if (res.success) loadApprovals();
+}
+
+// ── COMPENSATION ─────────────────────────────────────────────
+async function loadCompDocs() {
+  const res = await api('/api/compensation/required-docs');
+  if (!res.success) return;
+  const el = document.getElementById('doc-checklist');
+  el.innerHTML = res.data.map((doc,i) => `
+    <label class="checklist-item" style="cursor:pointer;">
+      <input type="checkbox" id="doc-${i}" value="${doc}" style="accent-color:var(--accent);" />
+      <span>${doc}</span>
+    </label>`).join('');
+}
+
+async function loadClaims() {
+  const res = await api('/api/compensation/claims');
+  if (!res.success) return;
+  const el = document.getElementById('claims-list');
+  const claims = res.data;
+  if (!claims.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;">No claims submitted yet in this session.</div>';
+    return;
+  }
+  el.innerHTML = claims.map(c => `
+    <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:monospace;color:var(--blue);font-size:12px;">${c.claim_id}</span>
+        <span class="badge-pending">PENDING REVIEW</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px;">
+        ${c.claimant_name} · ${c.village_name||c.village_id} ·
+        ${c.livestock_count} ${c.livestock_type} ·
+        <strong style="color:var(--text);">₹${(c.preliminary_amount_inr||0).toLocaleString()}</strong>
+        <span class="sample-label">indicative</span>
+      </div>
+    </div>`).join('');
+}
+
+async function submitClaim() {
+  const name  = document.getElementById('comp-name').value.trim();
+  const vid   = document.getElementById('comp-village').value;
+  const vname = document.getElementById('comp-village').selectedOptions[0].dataset.name;
+  const ltype = document.getElementById('comp-livestock').value;
+  const lcount= parseInt(document.getElementById('comp-count').value) || 1;
+  const notes = document.getElementById('comp-notes').value;
+  const incid = document.getElementById('comp-incidentid').value.trim();
+  const species = document.getElementById('comp-species').value;
+
+  if (!name) { alert('Please enter claimant name'); return; }
+
+  const docs = Array.from(document.querySelectorAll('#doc-checklist input:checked')).map(el=>el.value);
+
+  const body = {
+    claimant_name: name, village_id: vid, village_name: vname,
+    livestock_type: ltype, livestock_count: lcount,
+    species_responsible: species, notes, incident_id: incid || null,
+    documents_available: docs,
+  };
+
+  const res = await api('/api/compensation/submit', 'POST', body);
+  if (!res.success) { alert('Error: '+res.error); return; }
+
+  const claim = res.data;
+  const prev  = document.getElementById('claim-preview-content');
+  const prevArea = document.getElementById('claim-preview-area');
+
+  const docRows = (claim.doc_checklist||[]).map(d =>
+    `<div class="checklist-item"><span>${d.available?'✅':'❌'}</span><span>${d.document}</span></div>`
+  ).join('');
+
+  prev.innerHTML = `
+    <div class="claim-preview">
+      <div class="g2" style="margin-bottom:0.75rem;">
+        <div><div style="font-size:11px;color:var(--muted);">CLAIM ID</div><div style="font-family:monospace;color:var(--blue);">${claim.claim_id}</div></div>
+        <div><div style="font-size:11px;color:var(--muted);">PRELIMINARY AMOUNT</div>
+          <div style="font-size:1.4rem;font-weight:700;color:var(--low);">₹${(claim.preliminary_amount_inr||0).toLocaleString()} <span class="sample-label">indicative</span></div>
+        </div>
+      </div>
+      <div class="g2" style="font-size:12px;margin-bottom:0.75rem;">
+        <div><span style="color:var(--muted);">Claimant:</span> ${claim.claimant_name}</div>
+        <div><span style="color:var(--muted);">Village:</span> ${claim.village_name||claim.village_id}</div>
+        <div><span style="color:var(--muted);">Animal:</span> ${claim.livestock_count} × ${claim.livestock_type}</div>
+        <div><span style="color:var(--muted);">Rate:</span> ₹${(claim.rate_per_animal_inr||0).toLocaleString()} / animal</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Document Checklist</div>
+      ${docRows}
+      ${!claim.docs_complete ? `<div style="margin-top:8px;font-size:12px;color:var(--medium);">
+        ⚠ ${claim.missing_docs.length} document(s) missing. Claim can still be submitted for officer review.
+      </div>` : '<div style="margin-top:6px;font-size:12px;color:var(--low);">✅ All documents present.</div>'}
+    </div>`;
+  prevArea.style.display = 'block';
+  loadClaims();
+}
+
+// ── HOTSPOTS ─────────────────────────────────────────────────
+async function loadHotspots() {
+  const res = await api('/api/hotspots');
+  if (!res.success) return;
+  const d = res.data;
+
+  // Summaries
+  document.getElementById('hotspot-summaries').innerHTML = `
+    <div class="card-dark">
+      <div class="card-title">Daily Summary <span class="sample-label">SAMPLE</span></div>
+      <div style="font-size:13px;line-height:1.7;">${d.daily_summary||''}</div>
+    </div>
+    <div class="card-dark">
+      <div class="card-title">Weekly Summary <span class="sample-label">SAMPLE</span></div>
+      <div style="font-size:13px;line-height:1.7;">${d.weekly_summary||''}</div>
+    </div>`;
+
+  // Hotspot table
+  const htEl = document.getElementById('hotspot-table');
+  htEl.innerHTML = `<table class="table-dark-custom">
+    <thead><tr><th>ID</th><th>Center Village</th><th>Incidents</th><th>Intensity</th><th>Level</th><th>Dominant Species</th></tr></thead>
+    <tbody>
+    ${(d.hotspots||[]).map(h => {
+      const intCol = h.level==='CRITICAL'?'var(--high)':h.level==='HIGH'?'#f0a060':h.level==='MODERATE'?'var(--medium)':'var(--low)';
+      return `<tr>
+        <td style="font-family:monospace;font-size:12px;color:var(--blue);">${h.hotspot_id}</td>
+        <td>${h.center_village}</td>
+        <td>${h.incident_count}</td>
+        <td>
+          <div class="intensity-bar"><div class="intensity-fill" style="width:${Math.round(h.intensity*100)}%;background:${intCol};"></div></div>
+          <span style="font-size:11px;color:${intCol};">${(h.intensity*100).toFixed(0)}%</span>
+        </td>
+        <td>${riskBadge(h.level==='CRITICAL'?'CRITICAL':h.level)}</td>
+        <td>${speciesIcon(h.dominant_species)} ${h.dominant_species}</td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
+
+  // Trending
+  const trend = document.getElementById('trending-list');
+  trend.innerHTML = (d.trending_areas||[]).length
+    ? (d.trending_areas||[]).map(t => `
+        <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <strong>${t.village_name}</strong>
+            <span class="badge-${t.trend==='INCREASING'?'medium':'new'} ms-2">${t.trend}</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);">${t.recent_7d} this week vs ${t.prior_7d} last week</div>
+        </div>`).join('')
+    : '<div style="color:var(--muted);font-size:12px;">No clearly trending areas in current data.</div>';
+
+  // Rankings
+  const rb = document.getElementById('rankings-tbody');
+  rb.innerHTML = (d.risk_rankings||[]).map((r,i) => `
+    <tr>
+      <td style="color:var(--muted);">#${i+1}</td>
+      <td>${r.village_name}</td>
+      <td>
+        <div class="intensity-bar"><div class="intensity-fill" style="width:${Math.round(r.intensity*100)}%;background:${r.intensity>0.6?'var(--high)':r.intensity>0.3?'var(--medium)':'var(--low)'};"></div></div>
+        <span style="font-size:11px;color:var(--muted);">${(r.intensity*100).toFixed(0)}%</span>
+      </td>
+      <td>${riskBadge(r.level)}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--muted);">${r.hotspot_id||'—'}</td>
+    </tr>`).join('');
+}
+
+// ── AGENTS ───────────────────────────────────────────────────
+function renderAgentCards(statuses) {
+  const descs = {
+    'MovementAgent':     { icon:'🧠', desc:'Wildlife Movement Prediction', detail:'Analyzes spatial/temporal patterns from sightings' },
+    'AlertAgent':        { icon:'📢', desc:'Village Alert & Early Warning', detail:'Bilingual English+Gujarati alert generation' },
+    'ResponseAgent':     { icon:'🚨', desc:'Forest Response Coordination', detail:'Incident tickets + team recommendation (no auto-dispatch)' },
+    'CompensationAgent': { icon:'📋', desc:'Livestock Compensation Assistant', detail:'Claim preparation for human review only' },
+    'HotspotAgent':      { icon:'🗺', desc:'Conflict Hotspot Dashboard', detail:'Cluster analysis + intensity scoring' },
+  };
+  return statuses.map(s => {
+    const d = descs[s.agent] || {};
+    const dot = s.status==='PROCESSING'?'dot-processing':s.status==='ACTIVE'?'dot-active':'dot-idle';
+    return `<div class="agent-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:18px;">${d.icon||'🤖'}</span>
+        <span><span class="agent-status-dot ${dot}"></span><span style="font-size:11px;color:var(--muted);">${s.status||'IDLE'}</span></span>
+      </div>
+      <div style="font-weight:600;font-size:13px;margin-bottom:2px;">${s.agent}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${d.desc||''}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">${d.detail||''}</div>
+      ${s.last_action ? `<div style="font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:5px 8px;margin-bottom:6px;color:var(--text);">${s.last_action}</div>` : ''}
+      ${s.last_confidence ? conf(s.last_confidence) : ''}
+      <div style="font-size:10px;color:var(--muted);margin-top:5px;">Processed: ${s.total_processed||0} · ${s.last_run?timeAgo(s.last_run):'Never run'}</div>
+    </div>`;
+  }).join('');
+}
+
+async function loadAgentCards() {
+  const res = await api('/api/agents/status');
+  if (!res.success) return;
+  document.getElementById('agent-cards').innerHTML = renderAgentCards(res.data);
+}
+
+async function loadAgentLogs() {
+  const res = await api('/api/agents/logs');
+  if (!res.success) return;
+  const el = document.getElementById('agent-logs-list');
+  el.innerHTML = `<table class="table-dark-custom">
+    <thead><tr><th>Agent</th><th>Action</th><th>Confidence</th><th>Time</th></tr></thead>
+    <tbody>${(res.data||[]).map(l => `
+      <tr>
+        <td style="font-size:12px;color:var(--blue);">${l.agent}</td>
+        <td style="font-size:12px;">${l.action}</td>
+        <td>${conf(l.confidence)}</td>
+        <td style="font-size:11px;color:var(--muted);">${timeAgo(l.timestamp)}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ── DEMO ─────────────────────────────────────────────────────
+async function runDemo() {
+  document.getElementById('demo-btn').disabled = true;
+  document.getElementById('demo-spinner').style.display = 'inline';
+  document.getElementById('demo-steps').innerHTML = '';
+
+  const res = await api('/api/demo/run');
+  document.getElementById('demo-btn').disabled = false;
+  document.getElementById('demo-spinner').style.display = 'none';
+
+  if (!res.success) {
+    document.getElementById('demo-steps').innerHTML = '<div class="card-dark" style="color:var(--high);">Error running demo: '+res.error+'</div>';
+    return;
+  }
+
+  const result = res.data;
+  const steps  = result.steps || [];
+
+  // Animate pipeline circles
+  const circles = document.querySelectorAll('#demo-pipeline .circle');
+  steps.forEach((step, i) => {
+    if (circles[i]) {
+      circles[i].className = 'circle ' + (step.status==='AWAITING_HUMAN'?'circle-human':'circle-done');
+    }
+  });
+
+  const stepsEl = document.getElementById('demo-steps');
+  stepsEl.innerHTML = steps.map(step => `
+    <div class="demo-step ${step.status}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+        <div>
+          <span style="font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 8px;color:var(--muted);">Step ${step.step}</span>
+          <span style="margin-left:8px;font-weight:600;color:var(--low);">${step.agent}</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="${step.status==='COMPLETE'?'badge-low':step.status==='AWAITING_HUMAN'?'badge-medium':'badge-none'}">${step.status}</span>
+          <span style="font-size:11px;color:var(--muted);">${timeAgo(step.timestamp)}</span>
+        </div>
+      </div>
+      <div style="font-weight:500;font-size:13px;margin-bottom:6px;">${step.action}</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;">${step.detail||''}</div>
+      ${step.gu_text ? `<div class="gu-text" style="margin-top:6px;">${step.gu_text}</div>` : ''}
+      ${step.output ? `<div style="margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;">
+        ${Object.entries(step.output).map(([k,v]) =>
+          `<span style="color:var(--muted);">${k}:</span> <strong>${v}</strong>  `
+        ).join('')}
+      </div>` : ''}
+    </div>`).join('');
+
+  // Refresh other panels
+  loadDashboard();
+  loadApprovals();
+}
+
+// ── Init ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadDashboard();
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
